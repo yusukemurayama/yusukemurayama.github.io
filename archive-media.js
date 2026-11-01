@@ -50,7 +50,7 @@
     container.replaceChildren();
     const photos = window.ARCHIVE_PHOTOS?.[post.id] || [];
     appendPhotos(container, post.text, photos);
-    if (!photos.length && !post.text) container.append('本文の記載はありません。元記事をご覧ください。');
+    if (!photos.length && !post.text) container.append('本文の記載はありません。');
     for (const id of videos(post)) {
       const link = document.createElement('a');
       link.className = 'archive-video';

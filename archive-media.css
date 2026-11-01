@@ -4,3 +4,15 @@
 #detail-body figcaption { margin:.5rem 0; color:var(--muted,#bbb); font-size:.87em; line-height:1.7; }
 #detail-body .archive-video { display:block; width:fit-content; max-width:100%; margin:1rem 0; text-decoration:underline; }
 #detail-body .archive-video img { display:block; width:min(100%,480px); height:auto; margin-bottom:.4rem; }
+
+.archive-row { grid-template-columns:110px minmax(0,1fr); }
+.archive-row.with-photo { grid-template-columns:110px minmax(0,1fr) 108px; }
+.archive-row .archive-preview { align-self:center; }
+.archive-preview img { width:100%; aspect-ratio:3/2; object-fit:cover; }
+#detail-links:empty { margin:0; }
+@media (max-width:800px) {
+  .archive-row { grid-template-columns:minmax(0,1fr); }
+  .archive-row.with-photo { grid-template-columns:minmax(0,1fr) 76px; }
+  .archive-row.with-photo > div { grid-column:1; }
+  .archive-preview { grid-column:2; grid-row:1 / span 2; }
+}
