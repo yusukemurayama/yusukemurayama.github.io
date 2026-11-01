@@ -24,7 +24,7 @@ if (featured) {
   preview.append(image);
   preview.addEventListener('click', () => openPost(p, preview));
   row.classList.add('with-photo');
-  row.append(preview);
+  row.insertBefore(preview, mid);
 }
 results.append(row);}
 if(!filtered.length)results.append(text('p','一致する記録がありません。キーワードや条件を変えてお試しください。','empty'));more.hidden=filtered.length<=limit;more.style.display=more.hidden?'none':'';
