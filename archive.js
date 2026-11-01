@@ -3,6 +3,13 @@ const posts=window.ARCHIVE_POSTS;const $=id=>document.getElementById(id);
 const form=$('filters'),search=$('search'),year=$('year'),type=$('type'),theme=$('theme'),results=$('results'),more=$('more'),dialog=$('detail');
 let limit=24;const params=new URLSearchParams(location.search);
 const legacyTypes={"講演・授業": "講演・講義", "対談・イベント・展示": "講演・講義", "出演・インタビュー": "メディア出演", "書評・メディア紹介": "お知らせ", "執筆・寄稿": "執筆・配信", "動画・音声配信": "執筆・配信", "映像制作・取材協力": "執筆・配信", "著書・出版": "お知らせ", "受賞": "お知らせ", "賞の候補・選考": "お知らせ", "活動のお知らせ": "お知らせ", "講演・イベント": "講演・講義", "出演・メディア掲載": "メディア出演", "動画・音声": "執筆・配信", "著書・受賞": "お知らせ", "記事": "執筆・配信", "出演": "メディア出演", "イベント": "講演・講義"};
+for (const option of [...year.options].slice(1)) option.remove();
+for (const value of [...new Set(posts.map(post => post.year))].sort().reverse()) {
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = value;
+  year.append(option);
+}
 if(legacyTypes[params.get('type')])params.set('type',legacyTypes[params.get('type')]);
 const legacyThemes={"移民・難民と国境": "移民・難民", "ウクライナと戦争": "戦争・人道危機", "中東・シリア・ガザ": "戦争・人道危機", "開発・国際協力": "開発・援助", "取材・メディア": "ジャーナリズム", "アフリカ・開発": "開発・援助", "アフリカと開発": "開発・援助", "戦争・紛争": "戦争・人道危機", "政治・経済・社会": "そのほか", "米国と社会の分断": "そのほか", "子ども・教育・人権": "そのほか", "国際経済・資源・食料": "そのほか", "感染症と社会": "そのほか", "著作・受賞": "そのほか", "活動・キャリア": "そのほか"};
 if(legacyThemes[params.get('theme')])params.set('theme',legacyThemes[params.get('theme')]);

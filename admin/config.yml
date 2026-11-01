@@ -1,0 +1,232 @@
+{
+  "backend": {
+    "name": "github",
+    "repo": "yusukemurayama/yusukemurayama.github.io",
+    "branch": "main",
+    "auth_methods": [
+      "token"
+    ]
+  },
+  "publish_mode": "simple",
+  "media_folder": "assets/uploads",
+  "public_folder": "/assets/uploads",
+  "media_libraries": {
+    "default": {
+      "config": {
+        "transformations": {
+          "raster_image": {
+            "format": "webp",
+            "quality": 85,
+            "width": 1600,
+            "height": 1600
+          }
+        }
+      }
+    }
+  },
+  "collections": [
+    {
+      "name": "articles",
+      "label": "活動記録を編集",
+      "label_singular": "活動記録",
+      "folder": "content/articles",
+      "format": "json",
+      "extension": "json",
+      "create": true,
+      "delete": true,
+      "identifier_field": "id",
+      "slug": {
+        "template": "{{id}}",
+        "editable": false
+      },
+      "summary": "{{date}}　{{title}}",
+      "sortable_fields": [
+        "date",
+        "title"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "label": "記事ID（自動発行）",
+          "widget": "uuid",
+          "prefix": "post-"
+        },
+        {
+          "name": "title",
+          "label": "記事タイトル",
+          "widget": "string"
+        },
+        {
+          "name": "date",
+          "label": "投稿日付",
+          "widget": "datetime",
+          "format": "YYYY-MM-DD",
+          "time_format": false,
+          "default": "{{now}}"
+        },
+        {
+          "name": "body",
+          "label": "記事本文",
+          "widget": "markdown",
+          "hint": "文章を貼り付け、必要に応じてリンクや画像を挿入できます。",
+          "modes": [
+            "rich_text",
+            "raw"
+          ]
+        },
+        {
+          "name": "featuredImage",
+          "label": "アイキャッチ画像",
+          "widget": "object",
+          "required": false,
+          "collapsed": true,
+          "fields": [
+            {
+              "name": "src",
+              "label": "画像",
+              "widget": "image",
+              "required": false
+            },
+            {
+              "name": "alt",
+              "label": "画像の説明（ALT）",
+              "widget": "string",
+              "required": false
+            },
+            {
+              "name": "videoUrl",
+              "label": "この画像と同じYouTube動画のURL",
+              "widget": "string",
+              "required": false,
+              "hint": "同じサムネイルの場合だけ指定。冒頭画像が動画リンクになります。"
+            },
+            {
+              "name": "thumbnail",
+              "label": "既存一覧画像",
+              "widget": "hidden"
+            },
+            {
+              "name": "inlineMatches",
+              "label": "既存本文画像との重複",
+              "widget": "hidden"
+            }
+          ]
+        },
+        {
+          "name": "categories",
+          "label": "活動分類",
+          "widget": "select",
+          "multiple": true,
+          "required": false,
+          "options": [
+            "執筆・配信",
+            "メディア出演",
+            "講演・講義",
+            "お知らせ"
+          ]
+        },
+        {
+          "name": "topics",
+          "label": "取材テーマ",
+          "widget": "select",
+          "multiple": true,
+          "required": false,
+          "options": [
+            "移民・難民",
+            "戦争・人道危機",
+            "開発・援助",
+            "ジャーナリズム",
+            "そのほか"
+          ]
+        },
+        {
+          "name": "youtubeUrl",
+          "label": "YouTube URL",
+          "widget": "string",
+          "required": false
+        },
+        {
+          "name": "xPostUrl",
+          "label": "X投稿URL",
+          "widget": "string",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "homepage",
+      "label": "トップページ掲載管理",
+      "files": [
+        {
+          "name": "home",
+          "label": "掲載する各5本と順番",
+          "file": "content/settings/home.json",
+          "fields": [
+            {
+              "name": "media",
+              "label": "メディア出演（上から掲載順）",
+              "widget": "list",
+              "min": 5,
+              "max": 5,
+              "summary": "{{fields.post}}",
+              "fields": [
+                {
+                  "name": "post",
+                  "label": "掲載する記事",
+                  "widget": "relation",
+                  "collection": "articles",
+                  "search_fields": [
+                    "title",
+                    "date"
+                  ],
+                  "value_field": "id",
+                  "display_fields": [
+                    "{{date}}　{{title}}"
+                  ]
+                },
+                {
+                  "name": "displayTitle",
+                  "label": "トップページ専用の短い見出し（任意）",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "空欄なら選択時点の記事タイトルを使います。"
+                }
+              ]
+            },
+            {
+              "name": "lecture",
+              "label": "講演・講義（上から掲載順）",
+              "widget": "list",
+              "min": 5,
+              "max": 5,
+              "summary": "{{fields.post}}",
+              "fields": [
+                {
+                  "name": "post",
+                  "label": "掲載する記事",
+                  "widget": "relation",
+                  "collection": "articles",
+                  "search_fields": [
+                    "title",
+                    "date"
+                  ],
+                  "value_field": "id",
+                  "display_fields": [
+                    "{{date}}　{{title}}"
+                  ]
+                },
+                {
+                  "name": "displayTitle",
+                  "label": "トップページ専用の短い見出し（任意）",
+                  "widget": "string",
+                  "required": false,
+                  "hint": "空欄なら選択時点の記事タイトルを使います。"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

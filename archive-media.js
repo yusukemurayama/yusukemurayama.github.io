@@ -17,7 +17,7 @@
   }
 
   function videos(post) {
-    const urls = [...(post.text.match(urlPattern) || []), ...(post.links || []), ...(post.bodyLinks || []).map(link => link.url)];
+    const urls = [...(post.text.match(urlPattern) || []), ...(post.links || []), post.youtubeUrl || '', post.featuredImage?.videoUrl || '', ...(post.bodyLinks || []).map(link => link.url)];
     return [...new Set(urls.map(url => videoId(url.replace(/[。、.,;:!?)）]+$/, ''))).filter(Boolean))];
   }
 
@@ -142,6 +142,33 @@
     appendText(container, body, cursor, body.length, spans);
   }
 
+  const bodyTags = new Set(['p','br','strong','em','s','a','img','blockquote','ul','ol','li','h1','h2','h3','h4','h5','h6','pre','code','hr']);
+  function appendNodes(parent, nodes, videoIds, duplicateImages) {
+    for (const node of nodes) {
+      if (typeof node.text === 'string') {
+        parent.append(node.text);
+        continue;
+      }
+      if (!bodyTags.has(node.tag)) continue;
+      if (node.tag === 'p' && node.children?.length === 1 &&
+          videoIds.includes(videoId(node.children[0].text?.trim()))) continue;
+      if (node.tag === 'img' && duplicateImages.includes(node.src)) continue;
+      const element = document.createElement(node.tag);
+      if (node.tag === 'a' && safeUrl(node.href)) {
+        element.href = node.href;
+        element.target = '_blank';
+        element.rel = 'noopener noreferrer';
+      }
+      if (node.tag === 'img') {
+        if (!/^assets\//.test(node.src) || node.src.includes('..')) continue;
+        element.src = node.src;
+        element.alt = node.alt || '';
+      }
+      appendNodes(element, node.children || [], videoIds, duplicateImages);
+      parent.append(element);
+    }
+  }
+
   function render(container, post, references) {
     container.replaceChildren();
     const photos = window.ARCHIVE_PHOTOS?.[post.id] || [];
@@ -168,7 +195,12 @@
     const bodyPhotos = photos.filter(photo => !featured?.inlineMatches?.includes(photo.src));
     const links = (post.bodyLinks || []).filter(link => safeUrl(link.url));
     const videoIds = videos(post);
-    appendPhotos(container, post.text, bodyPhotos, textSpans(post.text, links, videoIds), links);
+    container.classList.toggle('rich-body', !!post.bodyNodes);
+    if (post.bodyNodes) {
+      appendNodes(container, post.bodyNodes, videoIds, featured?.inlineMatches || []);
+    } else {
+      appendPhotos(container, post.text, bodyPhotos, textSpans(post.text, links, videoIds), links);
+    }
     const inlineUrls = new Set([...container.querySelectorAll('a')].map(a => a.getAttribute('href')));
     const sources = new Set([...(post.links || []), ...links.map(link => link.url)]);
     // xPostUrl is an optional URL field for newly authored posts.

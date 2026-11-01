@@ -29,3 +29,8 @@
 .featured-video::before, .featured-video::after { content:""; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
 .featured-video::before { width:3.6rem; height:2.6rem; background:rgba(0,0,0,.78); border:1px solid #fff; border-radius:.55rem; }
 .featured-video::after { width:0; height:0; border-block:.52rem solid transparent; border-left:.9rem solid white; }
+
+#detail-body.rich-body { white-space:normal; }
+#detail-body.rich-body p, #detail-body.rich-body blockquote { margin:0 0 1em; }
+#detail-body.rich-body img { width:auto; height:auto; max-width:100%; max-height:75vh; object-fit:contain; }
+#detail-body.rich-body pre { white-space:pre-wrap; overflow-wrap:anywhere; }
