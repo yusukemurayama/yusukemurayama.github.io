@@ -21,6 +21,51 @@
     return [...new Set(urls.map(url => videoId(url.replace(/[。、.,;:!?)）]+$/, ''))).filter(Boolean))];
   }
 
+  function xStatus(raw) {
+    let url;
+    try { url = new URL(raw); } catch { return null; }
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.port ||
+        !/^(?:(?:www|mobile|m)\.)?(?:x|twitter)\.com$/.test(url.hostname)) return null;
+    const match = url.pathname.match(/^\/(?:([a-z0-9_]{1,15})\/status(?:es)?|i\/web\/status)\/(\d{1,20})(?:\/(?:photo|video)\/[1-9]\d*)?\/?$/i);
+    if (!match) return null;
+    const path = match[1] ? match[1] + '/status/' : 'i/web/status/';
+    return { id: match[2], url: 'https://x.com/' + path + match[2] };
+  }
+
+  let widgetLoader;
+  function xWidgets() {
+    if (window.twttr?.widgets?.createTweet) return Promise.resolve(window.twttr.widgets);
+    if (!widgetLoader) {
+      widgetLoader = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://platform.twitter.com/widgets.js';
+        script.async = true;
+        script.onload = () => {
+          if (window.twttr?.ready) window.twttr.ready(api => resolve(api.widgets));
+          else reject(new Error('X widgets unavailable'));
+        };
+        script.onerror = reject;
+        document.head.append(script);
+      });
+    }
+    return widgetLoader;
+  }
+
+  function appendXCard(container, status) {
+    const card = document.createElement('div');
+    card.className = 'archive-x-post';
+    const host = document.createElement('div');
+    const fallback = externalLink(status.url);
+    fallback.textContent = 'Xで投稿を見る';
+    card.append(host, fallback);
+    container.append(card);
+    xWidgets().then(widgets => {
+      if (host.isConnected) return widgets.createTweet(status.id, host, {
+        theme: 'dark', lang: 'ja', dnt: true, conversation: 'none'
+      });
+    }).catch(() => { /* The adjacent link also works when the widget is blocked. */ });
+  }
+
   function safeUrl(value) {
     try { return ['https:', 'http:'].includes(new URL(value).protocol); }
     catch { return false; }
@@ -117,7 +162,13 @@
     appendPhotos(container, post.text, bodyPhotos, textSpans(post.text, links, videoIds), links);
     const inlineUrls = new Set([...container.querySelectorAll('a')].map(a => a.getAttribute('href')));
     const sources = new Set([...(post.links || []), ...links.map(link => link.url)]);
-    const remaining = [...sources].filter(url => safeUrl(url) && !inlineUrls.has(url) && !videoIds.includes(videoId(url)));
+    // xPostUrl is an optional URL field for newly authored posts.
+    const xPosts = new Map();
+    for (const raw of [post.xPostUrl, ...sources, ...(post.text.match(urlPattern) || [])]) {
+      const status = xStatus(raw);
+      if (status) xPosts.set(status.id, status);
+    }
+    const remaining = [...sources].filter(url => safeUrl(url) && !xStatus(url) && !inlineUrls.has(url) && !videoIds.includes(videoId(url)));
     references.replaceChildren();
     if (remaining.length) {
       const heading = document.createElement('h3');
@@ -146,6 +197,7 @@
       link.append(img, 'YouTubeで動画を見る ↗');
       container.append(link);
     }
+    for (const status of xPosts.values()) appendXCard(container, status);
   }
   window.archiveMedia = { render, videos };
 })();

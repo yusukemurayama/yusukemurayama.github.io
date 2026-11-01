@@ -21,3 +21,6 @@
 #detail-featured img { display:block; width:auto; max-width:100%; height:auto; max-height:75vh; object-fit:contain; }
 
 #detail-body a { text-decoration:underline; text-underline-offset:.15em; }
+
+.archive-x-post { max-width:550px; min-width:0; margin:1rem 0; white-space:normal; }
+.archive-x-post iframe { max-width:100%; }
