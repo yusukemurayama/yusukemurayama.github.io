@@ -1,6 +1,6 @@
 from pathlib import Path
-import argparse,copy,datetime,json,re,shutil,subprocess
-from urllib.parse import urlsplit,unquote
+import argparse,copy,datetime,hashlib,json,re,shutil,subprocess
+from urllib.parse import urlsplit,urlunsplit,parse_qsl,urlencode,unquote
 from html.parser import HTMLParser
 from markdown_it import MarkdownIt
 
@@ -201,6 +201,31 @@ def verify_publication(output,manifest,complete=False):
         raise ValueError('公開成果物が不足しています '+', '.join(sorted(manifest-actual)))
 
 
+def version_assets(output):
+    """Change only local JS/CSS references, after all generated data is written."""
+    def replace_tag(match, page):
+        tag=match.group(0)
+        def replace_url(attr):
+            url=attr.group(3)
+            parsed=urlsplit(url)
+            if parsed.scheme or parsed.netloc or Path(parsed.path).suffix not in {'.js','.css'}:
+                return attr.group(0)
+            path=(output/parsed.path.lstrip('/')) if parsed.path.startswith('/') else page.parent/parsed.path
+            path=path.resolve()
+            if not path.is_relative_to(output) or not path.is_file():
+                raise ValueError('JS/CSS参照がありません '+url)
+            digest=hashlib.sha256(path.read_bytes()).hexdigest()[:20]
+            query=[(key,value) for key,value in parse_qsl(parsed.query,keep_blank_values=True) if key!='v']
+            query.append(('v',digest))
+            updated=urlunsplit((parsed.scheme,parsed.netloc,parsed.path,urlencode(query),parsed.fragment))
+            return attr.group(1)+attr.group(2)+updated+attr.group(2)
+        return re.sub(r"((?:src|href)=)([\"'])(.*?)(?:\2)",replace_url,tag,flags=re.IGNORECASE)
+    for page in output.rglob('*.html'):
+        source=page.read_text('utf8')
+        updated=re.sub(r'<(?:script|link)\b[^>]*>',lambda match:replace_tag(match,page),source,flags=re.IGNORECASE)
+        page.write_text(updated,encoding='utf8')
+
+
 def build(root,output):
     root=root.resolve()
     output=output.resolve()
@@ -229,6 +254,7 @@ def build(root,output):
             shutil.copyfile(root/name,output/name)
     write_js(output/'posts.js','ARCHIVE_POSTS',posts)
     write_js(output/'home-selection.js','HOME_SELECTION',home)
+    version_assets(output)
     verify_publication(output,manifest,complete=True)
     return posts,home
 

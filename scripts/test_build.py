@@ -1,5 +1,5 @@
 from pathlib import Path
-import copy,json,shutil,subprocess,tempfile,unittest
+import copy,json,re,shutil,subprocess,tempfile,unittest
 import build
 
 REPO=Path(__file__).resolve().parents[1]
@@ -63,6 +63,24 @@ class PublishingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'公開対象外'):
             build.build(root,root/'_site')
         hidden.rmdir()
+        old_html=(root/'_site/archive.html').read_text('utf8')
+        old_home=(root/'_site/index.html').read_text('utf8')
+        def versions(page):
+            return dict(re.findall(r'(?:src|href)="([^"?]+\.(?:js|css))\?v=([0-9a-f]{20})"',page))
+        before=versions(old_html)
+        self.assertIn('posts.js',before)
+        self.assertIn('archive.js',before)
+        self.assertIn('style.css',before)
+        build.build(root,root/'_site')
+        self.assertEqual((root/'_site/archive.html').read_text('utf8'),old_html)
+        with (root/'archive.js').open('a',encoding='utf8') as f:f.write('\n/* cache test */')
+        with (root/'style.css').open('a',encoding='utf8') as f:f.write('\n/* cache test */')
+        build.build(root,root/'_site')
+        changed=versions((root/'_site/archive.html').read_text('utf8'))
+        self.assertNotEqual(before['archive.js'],changed['archive.js'])
+        self.assertNotEqual(before['style.css'],changed['style.css'])
+        self.assertEqual(before['posts.js'],changed['posts.js'])
+        self.assertEqual(re.findall(r'<img[^>]+>',old_home),re.findall(r'<img[^>]+>',(root/'_site/index.html').read_text('utf8')))
         ids=['post-00000000-0000-4000-8000-000000000001','post-00000000-0000-4000-8000-000000000002']
         test={'id':ids[0],'title':'検証用の活動記録','date':'2030-01-01','body':'一段落目\n同じ段落の改行\n\n**太字** と [資料](https://example.com/report)\n\n<script>alert(1)</script>','categories':['執筆・配信'],'topics':['移民・難民'],'youtubeUrl':'https://youtu.be/l-3zHWV4-K0','xPostUrl':''}
         first=root/'content/articles'/f'{ids[0]}.json'
@@ -72,6 +90,7 @@ class PublishingTests(unittest.TestCase):
         write(second,image_post)
         new,new_home=build.build(root,root/'_site')
         self.assertEqual(len(new),197)
+        self.assertNotEqual(before['posts.js'],versions((root/'_site/archive.html').read_text('utf8'))['posts.js'])
         self.assertEqual(new_home,home)
         self.assertIsNone(next(p for p in new if p['id']==ids[0])['featuredImage'])
         self.assertIn('https://example.com/report',next(p for p in new if p['id']==ids[0])['links'])
