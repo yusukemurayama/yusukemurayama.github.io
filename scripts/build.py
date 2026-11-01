@@ -6,7 +6,7 @@ from markdown_it import MarkdownIt
 
 CATEGORIES={'執筆・配信','メディア出演','講演・講義','お知らせ'}
 TOPICS={'移民・難民','戦争・人道危機','開発・援助','ジャーナリズム','そのほか'}
-PUBLIC_FILES=['.nojekyll','index.html','archive.html','style.css','bold.css','boat.css','site-header.css','archive-media.css','archive-media.js','archive.js','gallery.js','recent-works.js','archive-photos.js']
+PUBLIC_FILES=['contact/index.html','contact/contact.css','.nojekyll','index.html','archive.html','style.css','bold.css','boat.css','site-header.css','archive-media.css','archive-media.js','archive.js','gallery.js','recent-works.js','archive-photos.js']
 ALLOWED_TAGS={'p','br','strong','em','s','a','img','blockquote','ul','ol','li','h1','h2','h3','h4','h5','h6','pre','code','hr'}
 
 def read(path):
@@ -247,6 +247,7 @@ def build(root,output):
     # Validate everything before touching the previously generated directory.
     output.mkdir(parents=True,exist_ok=True)
     for name in PUBLIC_FILES:
+        (output/name).parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(root/name,output/name)
     for name in sorted(manifest):
         if name.startswith(('assets/','admin/')):

@@ -29,6 +29,7 @@ class PublishingTests(unittest.TestCase):
                        'lecture':[{'post':id,'displayTitle':''} for id in ['2111','2107','2020','2011','1992']]}
         write(cls.root/'content/settings/home.json',cls.selection)
         for file in build.PUBLIC_FILES:
+            (cls.root/file).parent.mkdir(parents=True,exist_ok=True)
             shutil.copyfile(REPO/file,cls.root/file)
         def git(*args):
             subprocess.run(['git','-C',str(cls.root),*args],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -48,6 +49,12 @@ class PublishingTests(unittest.TestCase):
         current=sorted([entry['post'] for entry in self.baseline.values()],key=lambda p:(p['date'],int(p['id'])),reverse=True)
         self.assertEqual(current,original)
         self.assertEqual(len(original),195)
+        contact=(root/'_site/contact/index.html').read_text('utf8')
+        self.assertIn('viewform?embedded=true',contact)
+        self.assertIn('title="村山祐介へのお問い合わせフォーム"',contact)
+        self.assertIn('contact.css?v=',contact)
+        for page in ['index.html','archive.html','contact/index.html']:
+            self.assertNotIn('https://murayamayusuke.com/contact/',(root/'_site'/page).read_text('utf8'))
         self.assertEqual(len({p['id'] for p in original}),195)
         self.assertTrue(all(p['featuredImage'] for p in original))
         self.assertFalse((root/'_site/content').exists())
