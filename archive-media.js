@@ -50,14 +50,15 @@
     container.replaceChildren();
     const photos = window.ARCHIVE_PHOTOS?.[post.id] || [];
     const featured = post.featuredImage;
+    const figure = document.getElementById('detail-featured');
+    figure.hidden = !featured;
+    const image = figure.querySelector('img');
     if (featured) {
-      const figure = document.createElement('figure');
-      figure.className = 'archive-photo archive-featured';
-      const image = document.createElement('img');
       image.src = featured.src;
       image.alt = featured.alt;
-      figure.append(image);
-      container.append(figure);
+    } else {
+      image.removeAttribute('src');
+      image.alt = '';
     }
     const bodyPhotos = photos.filter(photo => !featured?.inlineMatches?.includes(photo.src));
     appendPhotos(container, post.text, bodyPhotos);
