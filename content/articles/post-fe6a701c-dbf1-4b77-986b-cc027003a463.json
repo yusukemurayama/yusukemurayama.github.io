@@ -1,0 +1,19 @@
+{
+  "id": "post-fe6a701c-dbf1-4b77-986b-cc027003a463",
+  "title": "テスト",
+  "date": "2026-11-01",
+  "body": "テスト",
+  "featuredImage": {
+    "src": "/assets/uploads/photo_2026-02-12_01-14-05 (2).webp",
+    "alt": "テスト",
+    "videoUrl": ""
+  },
+  "categories": [
+    "メディア出演"
+  ],
+  "topics": [
+    "戦争・人道危機"
+  ],
+  "youtubeUrl": "",
+  "xPostUrl": ""
+}
