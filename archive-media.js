@@ -17,15 +17,60 @@
   }
 
   function videos(post) {
-    const urls = [...(post.text.match(urlPattern) || []), ...post.links];
+    const urls = [...(post.text.match(urlPattern) || []), ...(post.links || []), ...(post.bodyLinks || []).map(link => link.url)];
     return [...new Set(urls.map(url => videoId(url.replace(/[。、.,;:!?)）]+$/, ''))).filter(Boolean))];
   }
 
-  function appendPhotos(container, body, photos) {
+  function safeUrl(value) {
+    try { return ['https:', 'http:'].includes(new URL(value).protocol); }
+    catch { return false; }
+  }
+
+  function externalLink(url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    return link;
+  }
+
+  function textSpans(body, links, videoIds) {
+    const spans = links.filter(link => Number.isInteger(link.start) && link.start >= 0 &&
+      link.text && body.startsWith(link.text, link.start))
+      .map(link => ({ ...link, end: link.start + link.text.length }));
+    for (const match of body.matchAll(/^[^\S\n]*(https?:\/\/[^\s]+)[^\S\n]*$/gm)) {
+      const start = match.index, end = start + match[0].length;
+      const id = videoId(match[1]);
+      if (!videoIds.includes(id)) continue;
+      const overlap = spans.filter(span => span.start < end && span.end > start);
+      if (overlap.some(span => span.text.trim() !== match[1] || videoId(span.url) !== id)) continue;
+      for (const span of overlap) spans.splice(spans.indexOf(span), 1);
+      spans.push({start, end});
+    }
+    return spans.sort((a,b) => a.start - b.start);
+  }
+
+  function appendText(node, body, start, end, spans) {
+    let cursor = start;
+    for (const span of spans) {
+      if (span.end <= cursor || span.start >= end) continue;
+      const from = Math.max(cursor, span.start);
+      node.append(body.slice(cursor, from));
+      cursor = Math.min(end, span.end);
+      if (span.url) {
+        const link = externalLink(span.url);
+        link.textContent = body.slice(from, cursor);
+        node.append(link);
+      }
+    }
+    node.append(body.slice(cursor, end));
+  }
+
+  function appendPhotos(container, body, photos, spans, links) {
     let cursor = 0;
     for (const photo of photos) {
       if (photo.at < cursor || photo.at > body.length) continue;
-      container.append(body.slice(cursor, photo.at));
+      appendText(container, body, cursor, photo.at, spans);
       cursor = photo.at;
       const figure = document.createElement('figure');
       figure.className = 'archive-photo';
@@ -34,19 +79,25 @@
       img.width = photo.width;
       img.height = photo.height;
       img.alt = photo.alt;
-      figure.append(img);
+      const source = links.find(link => link.images?.includes(photo.src));
+      if (source) {
+        const anchor = externalLink(source.url);
+        anchor.setAttribute('aria-label', img.alt || source.url);
+        anchor.append(img);
+        figure.append(anchor);
+      } else figure.append(img);
       if (photo.captionStart === cursor && photo.captionEnd <= body.length) {
         const caption = document.createElement('figcaption');
-        caption.textContent = body.slice(cursor, photo.captionEnd);
+        appendText(caption, body, cursor, photo.captionEnd, spans);
         figure.append(caption);
         cursor = photo.captionEnd;
       }
       container.append(figure);
     }
-    container.append(body.slice(cursor));
+    appendText(container, body, cursor, body.length, spans);
   }
 
-  function render(container, post) {
+  function render(container, post, references) {
     container.replaceChildren();
     const photos = window.ARCHIVE_PHOTOS?.[post.id] || [];
     const featured = post.featuredImage;
@@ -61,9 +112,25 @@
       image.alt = '';
     }
     const bodyPhotos = photos.filter(photo => !featured?.inlineMatches?.includes(photo.src));
-    appendPhotos(container, post.text, bodyPhotos);
+    const links = (post.bodyLinks || []).filter(link => safeUrl(link.url));
+    const videoIds = videos(post);
+    appendPhotos(container, post.text, bodyPhotos, textSpans(post.text, links, videoIds), links);
+    const inlineUrls = new Set([...container.querySelectorAll('a')].map(a => a.getAttribute('href')));
+    const sources = new Set([...(post.links || []), ...links.map(link => link.url)]);
+    const remaining = [...sources].filter(url => safeUrl(url) && !inlineUrls.has(url) && !videoIds.includes(videoId(url)));
+    references.replaceChildren();
+    if (remaining.length) {
+      const heading = document.createElement('h3');
+      heading.textContent = '関連リンク';
+      references.append(heading);
+      for (const url of remaining) {
+        const anchor = externalLink(url);
+        anchor.textContent = url;
+        references.append(anchor);
+      }
+    }
     if (!photos.length && !post.text) container.append('本文の記載はありません。');
-    for (const id of videos(post)) {
+    for (const id of videoIds) {
       const link = document.createElement('a');
       link.className = 'archive-video';
       link.href = 'https://www.youtube.com/watch?v=' + id;
