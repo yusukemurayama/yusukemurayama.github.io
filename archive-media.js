@@ -49,7 +49,18 @@
   function render(container, post) {
     container.replaceChildren();
     const photos = window.ARCHIVE_PHOTOS?.[post.id] || [];
-    appendPhotos(container, post.text, photos);
+    const featured = post.featuredImage;
+    if (featured) {
+      const figure = document.createElement('figure');
+      figure.className = 'archive-photo archive-featured';
+      const image = document.createElement('img');
+      image.src = featured.src;
+      image.alt = featured.alt;
+      figure.append(image);
+      container.append(figure);
+    }
+    const bodyPhotos = photos.filter(photo => !featured?.inlineMatches?.includes(photo.src));
+    appendPhotos(container, post.text, bodyPhotos);
     if (!photos.length && !post.text) container.append('本文の記載はありません。');
     for (const id of videos(post)) {
       const link = document.createElement('a');

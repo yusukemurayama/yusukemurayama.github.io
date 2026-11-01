@@ -11,14 +11,14 @@ for(const [el,key] of [[search,'q'],[year,'year'],[type,'type'],[theme,'theme']]
 function text(tag,value,className){const e=document.createElement(tag);e.textContent=value;if(className)e.className=className;return e;}
 const labelTones={'執筆・配信':'ink','メディア出演':'plum','講演・講義':'sage','お知らせ':'sand','移民・難民':'ink','戦争・人道危機':'rose','開発・援助':'sage','ジャーナリズム':'plum','そのほか':'sand'};
 function render(){const q=search.value.trim().normalize('NFKC').toLocaleLowerCase();const filtered=posts.filter(p=>(!year.value||p.year===year.value)&&(!type.value||(type.value==='media'?(p.categories.includes('メディア出演')||(p.detailedCategories||[]).includes('執筆・寄稿')):p.categories.includes(type.value)))&&(!theme.value||(theme.value==='テーマ情報なし'?!p.topics.length:p.topics.includes(theme.value)))&&(!q||(p.title+' '+p.text+' '+p.categories.join(' ')+' '+p.topics.join(' ')+' '+(p.detailedCategories||[]).join(' ')+' '+(p.detailedTopics||[]).join(' ')).normalize('NFKC').toLocaleLowerCase().includes(q)));results.replaceChildren();$('count').textContent=`${filtered.length}件 / 全${posts.length}件`;
-for(const p of filtered.slice(0,limit)){const row=text('article','','archive-row');const date=text('time',p.date.replaceAll('-','.'));date.dateTime=p.date;row.append(date);const mid=document.createElement('div'),h=document.createElement('h2'),button=text('button',p.title);button.type='button';button.addEventListener('click',()=>openPost(p,button));h.append(button);mid.append(h);const tags=text('div','','tags');for(const tag of [p.categories[0],...p.topics].filter(Boolean).slice(0,3))tags.append(text('span',tag,'label-'+(labelTones[tag]||'sand')));mid.append(tags);row.append(mid);const firstPhoto = window.ARCHIVE_PHOTOS?.[p.id]?.[0];
-if (firstPhoto) {
+for(const p of filtered.slice(0,limit)){const row=text('article','','archive-row');const date=text('time',p.date.replaceAll('-','.'));date.dateTime=p.date;row.append(date);const mid=document.createElement('div'),h=document.createElement('h2'),button=text('button',p.title);button.type='button';button.addEventListener('click',()=>openPost(p,button));h.append(button);mid.append(h);const tags=text('div','','tags');for(const tag of [p.categories[0],...p.topics].filter(Boolean).slice(0,3))tags.append(text('span',tag,'label-'+(labelTones[tag]||'sand')));mid.append(tags);row.append(mid);const featured = p.featuredImage;
+if (featured) {
   const preview = document.createElement('button');
   preview.type = 'button';
   preview.className = 'archive-preview';
   preview.setAttribute('aria-label', p.title + '（写真付きの記事を開く）');
   const image = document.createElement('img');
-  image.src = firstPhoto.src;
+  image.src = featured.thumbnail;
   image.alt = '';
   image.loading = 'lazy';
   preview.append(image);

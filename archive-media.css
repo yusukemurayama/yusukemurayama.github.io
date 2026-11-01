@@ -8,7 +8,7 @@
 .archive-row { grid-template-columns:110px minmax(0,1fr); }
 .archive-row.with-photo { grid-template-columns:110px minmax(0,1fr) 108px; }
 .archive-row .archive-preview { align-self:center; }
-.archive-preview img { width:100%; aspect-ratio:3/2; object-fit:cover; }
+.archive-preview img { width:100%; height:auto; max-height:110px; object-fit:contain; }
 #detail-links:empty { margin:0; }
 @media (max-width:800px) {
   .archive-row { grid-template-columns:minmax(0,1fr); }
@@ -16,3 +16,4 @@
   .archive-row.with-photo > div { grid-column:1; }
   .archive-preview { grid-column:2; grid-row:1 / span 2; }
 }
+#detail-body .archive-featured { margin:0 0 1.25rem; }
