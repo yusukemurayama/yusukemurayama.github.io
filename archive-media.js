@@ -149,9 +149,18 @@
     const figure = document.getElementById('detail-featured');
     figure.hidden = !featured;
     const image = figure.querySelector('img');
+    figure.replaceChildren(image);
+    const featuredVideoId = featured && videoId(featured.videoUrl);
     if (featured) {
       image.src = featured.src;
       image.alt = featured.alt;
+      if (featuredVideoId) {
+        const player = externalLink('https://www.youtube.com/watch?v=' + featuredVideoId);
+        player.className = 'featured-video';
+        player.setAttribute('aria-label', post.title + '（YouTubeで動画を見る）');
+        player.append(image);
+        figure.append(player);
+      }
     } else {
       image.removeAttribute('src');
       image.alt = '';
@@ -182,6 +191,7 @@
     }
     if (!photos.length && !post.text) container.append('本文の記載はありません。');
     for (const id of videoIds) {
+      if (id === featuredVideoId) continue;
       const link = document.createElement('a');
       link.className = 'archive-video';
       link.href = 'https://www.youtube.com/watch?v=' + id;
