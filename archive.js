@@ -37,7 +37,7 @@ results.append(row);}
 if(!filtered.length)results.append(text('p','一致する記録がありません。キーワードや条件を変えてお試しください。','empty'));more.hidden=filtered.length<=limit;more.style.display=more.hidden?'none':'';
 }
 let opener;
-function openPost(p,button){opener=button;$('detail-date').textContent=p.date;$('detail-title').textContent=p.title;window.archiveMedia.render($('detail-body'),p,$('detail-links'));dialog.showModal();dialog.scrollTop=0;}
+function openPost(p,button){opener=button;$('detail-date').textContent=p.date;$('detail-title').textContent=p.title;window.archiveMedia.render($('detail-body'),p,$('detail-links'));document.dispatchEvent(new CustomEvent('archive:open',{detail:{id:p.id}}));dialog.showModal();dialog.scrollTop=0;}
 $('close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});dialog.addEventListener('close',()=>{if(opener)opener.focus();});
 form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('input',()=>{limit=24;render();});form.addEventListener('change',()=>{limit=24;render();});form.addEventListener('reset',()=>setTimeout(()=>{limit=24;render();},0));more.addEventListener('click',()=>{limit+=24;render();});render();const selected=posts.find(p=>p.id===params.get('post'));if(selected)openPost(selected);
 })();
