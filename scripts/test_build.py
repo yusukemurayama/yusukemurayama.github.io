@@ -53,6 +53,16 @@ class PublishingTests(unittest.TestCase):
         self.assertFalse((root/'_site/content').exists())
         self.assertFalse((root/'_site/scripts').exists())
         self.assertFalse((root/'_site/.github').exists())
+        stray=root/'_site'/'private-notes.txt'
+        stray.write_text('test fixture only',encoding='utf8')
+        with self.assertRaisesRegex(ValueError,'公開対象外'):
+            build.build(root,root/'_site')
+        stray.unlink()
+        hidden=root/'_site'/'.git'
+        hidden.mkdir()
+        with self.assertRaisesRegex(ValueError,'公開対象外'):
+            build.build(root,root/'_site')
+        hidden.rmdir()
         ids=['post-00000000-0000-4000-8000-000000000001','post-00000000-0000-4000-8000-000000000002']
         test={'id':ids[0],'title':'検証用の活動記録','date':'2030-01-01','body':'一段落目\n同じ段落の改行\n\n**太字** と [資料](https://example.com/report)\n\n<script>alert(1)</script>','categories':['執筆・配信'],'topics':['移民・難民'],'youtubeUrl':'https://youtu.be/l-3zHWV4-K0','xPostUrl':''}
         first=root/'content/articles'/f'{ids[0]}.json'

@@ -165,6 +165,42 @@ def homepage(root,current,legacy):
             result[name].append({'id':id,'date':record['date'],'title':item.get('displayTitle') or record['title'],'compact':bool(item.get('displayTitle'))})
     return result
 
+def publication_manifest(root):
+    files=set(PUBLIC_FILES+['admin/index.html','admin/config.yml','posts.js','home-selection.js'])
+    image_types={'.jpg','.jpeg','.png','.webp','.gif','.svg'}
+    for path in (root/'assets').rglob('*'):
+        if path.is_symlink() or getattr(path,'is_junction',lambda:False)():
+            raise ValueError('公開画像内のリンクは許可されません '+str(path))
+        relative=path.relative_to(root)
+        if any(part.startswith('.') for part in relative.parts):
+            raise ValueError('公開画像内に隠しファイルがあります '+str(relative))
+        if path.is_file():
+            if path.suffix.lower() not in image_types:
+                raise ValueError('公開画像以外のファイルがあります '+str(relative))
+            files.add(relative.as_posix())
+    return files
+
+
+def verify_publication(output,manifest,complete=False):
+    # Refuse stale output or unexpected files; never silently publish or delete them.
+    if output.is_symlink() or getattr(output,'is_junction',lambda:False)():
+        raise ValueError('公開出力先にリンクは使用できません')
+    directories={str(parent).replace('\\','/') for name in manifest for parent in Path(name).parents if str(parent)!='.'}
+    actual=set()
+    for path in output.rglob('*'):
+        relative=path.relative_to(output).as_posix()
+        if path.is_symlink() or getattr(path,'is_junction',lambda:False)():
+            raise ValueError('公開成果物にリンクがあります '+relative)
+        if path.is_file():
+            actual.add(relative)
+            if relative not in manifest:
+                raise ValueError('公開対象外のファイルがあります '+relative)
+        elif relative not in directories:
+            raise ValueError('公開対象外のフォルダがあります '+relative)
+    if complete and actual!=manifest:
+        raise ValueError('公開成果物が不足しています '+', '.join(sorted(manifest-actual)))
+
+
 def build(root,output):
     root=root.resolve()
     output=output.resolve()
@@ -181,14 +217,19 @@ def build(root,output):
     posts=[compile_post(root,p,legacy) for p in records.values()]
     posts.sort(key=lambda p:(p['date'],int(p['id']) if p['id'].isdigit() else -1,p['id']),reverse=True)
     home=homepage(root,records,legacy)
+    manifest=publication_manifest(root)
+    verify_publication(output,manifest)
     # Validate everything before touching the previously generated directory.
     output.mkdir(parents=True,exist_ok=True)
     for name in PUBLIC_FILES:
         shutil.copyfile(root/name,output/name)
-    shutil.copytree(root/'assets',output/'assets',dirs_exist_ok=True)
-    shutil.copytree(root/'admin',output/'admin',dirs_exist_ok=True)
+    for name in sorted(manifest):
+        if name.startswith(('assets/','admin/')):
+            (output/name).parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(root/name,output/name)
     write_js(output/'posts.js','ARCHIVE_POSTS',posts)
     write_js(output/'home-selection.js','HOME_SELECTION',home)
+    verify_publication(output,manifest,complete=True)
     return posts,home
 
 if __name__=='__main__':
