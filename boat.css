@@ -263,3 +263,6 @@
 @media (max-width: 700px) {
   .boat-home .works-two .work-image { width: 112%; margin-inline: -6%; }
 }
+
+/* Fill the lecture thumbnail frame while preserving its proportions. */
+.boat-home .works-two .work-image img[src="assets/lecture.jpg"] { object-fit: cover; object-position: center 40%; }
