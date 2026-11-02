@@ -19,15 +19,23 @@
   cursor: pointer;
 }
 .language-control:focus-within { outline: 2px solid currentColor; outline-offset: 1px; }
-.site-header .language-control { flex: none; margin-inline-start: auto; }
-#detail .language-control { vertical-align: middle; }
+.language-original { color: #c4c4c4; font: 12px/1.4 sans-serif; white-space: nowrap; }
+body header.site-header { column-gap: 12px; }
+body header.site-header nav { margin-inline-start: auto; }
+.site-header > :is(.language-control,.language-original) { flex: none; }
 @media (max-width: 700px) {
-  body header.site-header:has(.language-control) {
+  body header.site-header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0,1fr) auto;
     align-items: center;
-    gap: 0 6px;
+    gap: 12px 4px;
   }
-  .site-header:has(.language-control) .boat-logo-link { min-width: 0; width: min(100%,425px); }
-  .site-header:has(.language-control) nav { grid-column: 1 / -1; }
+  body header.site-header .boat-logo-link { grid-column: 1 / -1; }
+  body header.site-header nav { margin: 0; }
+}
+/* At narrow widths keep the full-size navigation and share the logo row. */
+@media (max-width: 374px) {
+  body header.site-header .boat-logo-link { grid-column: 1; }
+  body header.site-header nav { grid-column: 1 / -1; grid-row: 2; }
+  .site-header > :is(.language-control,.language-original) { grid-column: 2; grid-row: 1; }
 }
