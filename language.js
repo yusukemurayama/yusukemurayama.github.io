@@ -4,19 +4,13 @@
     ja: '日本語', en: 'English', es: 'Español', fr: 'Français',
     ru: 'Русский', 'zh-CN': '简体中文', ar: 'العربية', uk: 'Українська'
   };
-  const originalHosts = {
-    'yusukemurayama-github-io.translate.goog': 'yusukemurayama.github.io',
-    'murayamayusuke-com.translate.goog': 'murayamayusuke.com',
-    'www-murayamayusuke-com.translate.goog': 'www.murayamayusuke.com'
-  };
-  const translated = Object.hasOwn(originalHosts, location.hostname);
-  const params = new URLSearchParams(location.search);
-  const current = translated ? params.get('_x_tr_tl') || params.get('mt') : 'ja';
+  // Google serves translated documents (including article dialogs) on this origin family.
+  if (location.hostname.endsWith('.translate.goog') || location.hostname === 'translate.goog') return;
+
   let articleId;
 
   function changeLanguage(code) {
     const original = new URL(location.href);
-    if (translated) original.hostname = originalHosts[location.hostname];
     for (const key of [...original.searchParams.keys()]) {
       if (key === 'mt' || key === 'lang' || key.startsWith('_x_tr_')) original.searchParams.delete(key);
     }
@@ -32,27 +26,26 @@
   }
 
   function selector() {
-    const bar = document.createElement('div');
-    bar.className = 'language-bar notranslate';
-    bar.translate = false;
-    const label = document.createElement('label');
-    label.append('Language / 言語 ');
+    const control = document.createElement('label');
+    control.className = 'language-control notranslate';
+    control.translate = false;
+    const face = document.createElement('span');
+    face.setAttribute('aria-hidden', 'true');
+    face.textContent = '🌐︎ JA ▾';
     const select = document.createElement('select');
+    select.setAttribute('aria-label', '表示言語を選択 / Select language');
     for (const [code, name] of Object.entries(languages)) {
       const option = new Option(name, code);
       option.lang = code;
       select.add(option);
     }
-    select.value = Object.hasOwn(languages, current) ? current : 'ja';
     select.addEventListener('change', () => changeLanguage(select.value));
-    // A browser may restore the control's last selection when navigating back.
-    window.addEventListener('pageshow', () => { select.value = Object.hasOwn(languages, current) ? current : 'ja'; });
-    label.append(select);
-    bar.append(label);
-    return bar;
+    window.addEventListener('pageshow', () => { select.value = 'ja'; });
+    control.append(face, select);
+    return control;
   }
-  document.querySelector('.site-header').after(selector());
-  const date = document.querySelector('#detail-date');
-  if (date) date.before(selector());
+  document.querySelector('.site-header nav').before(selector());
+  const close = document.querySelector('#detail #close');
+  if (close) close.after(selector());
   document.addEventListener('archive:open', event => { articleId = event.detail.id; });
 })();
