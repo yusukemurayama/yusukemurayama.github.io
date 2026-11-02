@@ -128,7 +128,7 @@
 .boat-home .hero-channels .channel-links{display:flex;flex-direction:row;align-items:center}
 .boat-home .hero-channels .channel-logo{display:flex;flex-direction:row;align-items:center;justify-content:center;height:48px;min-height:48px;padding:0}
 .boat-home .hero-channels .youtube-wordmark{height:48px;min-height:48px;display:flex;align-items:center;line-height:1}
-.boat-home .hero-channels .letter-official-logo{width:135px;height:48px;max-height:none;object-fit:contain;padding:12px 13px;margin:0}
+.boat-home .hero-channels .letter-official-logo{width:135px;height:48px;max-height:none;object-fit:contain;padding:4px;margin:0}
 /* Portrait starts the biography on the left, with text flowing beside it. */
 .boat-home .profile-intro.profile-left{display:flow-root;margin-top:28px}
 .boat-home .profile-left .profile-portrait{float:left;width:20%;max-width:200px;aspect-ratio:.85;margin:0 32px 18px 0}
