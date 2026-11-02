@@ -290,3 +290,10 @@
   }
   .boat-home #reporting .story-photo img { transform:none; }
 }
+
+/* Keep desktop reporting captions on one line at the lower photo edge. */
+@media (min-width:1101px) {
+  .boat-home #reporting .story { padding-bottom:24px; }
+  .boat-home #reporting .story:has(.story-photo) { padding:0 16px 24px; }
+  .boat-home #reporting .story p { max-width:none; font-size:13px; white-space:nowrap; }
+}
