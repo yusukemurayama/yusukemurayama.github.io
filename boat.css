@@ -267,11 +267,26 @@
 /* Fill the lecture thumbnail frame while preserving its proportions. */
 .boat-home .works-two .work-image img[src="assets/lecture.jpg"] { object-fit: cover; object-position: center 40%; }
 
-/* Enlarge only the two supporting reporting photos. */
-.boat-home #reporting .story-photo { display:block; aspect-ratio:1.65; overflow:hidden; margin-bottom:18px; }
-.boat-home #reporting .story-photo img { width:100%; height:100%; margin:0; object-fit:cover; transform:scale(1.07); }
-.boat-home #reporting .story-photo img[src="assets/africa.jpg"] { transform-origin:center top; object-position:center top; }
+/* Match the lead story's overlay while keeping the supporting photo crops. */
+.boat-home #reporting .story:has(.story-photo) {
+  position:relative; display:flex; flex-direction:column; justify-content:end;
+  min-height:410px; padding:0 4% 35px; overflow:hidden;
+}
+.boat-home #reporting .story-photo {
+  position:absolute; inset:0; display:block; overflow:hidden;
+}
+.boat-home #reporting .story-photo img {
+  width:100%; height:100%; margin:0; object-fit:cover; transform:scale(1.07);
+}
+.boat-home #reporting .story-photo img[src="assets/africa.jpg"] {
+  transform-origin:center top; object-position:center top;
+}
+.boat-home #reporting .story:has(.story-photo)>:not(.story-photo) {
+  position:relative; z-index:2;
+}
 @media (max-width:700px) {
-  .boat-home #reporting .story-photo { width:100vw; height:calc(89vw / 1.65); aspect-ratio:auto; margin-inline:calc(50% - 50vw); margin-bottom:14px; }
+  .boat-home #reporting .story:has(.story-photo) {
+    min-height:345px; padding:0 6% 28px; margin-inline:-6.2%;
+  }
   .boat-home #reporting .story-photo img { transform:none; }
 }
