@@ -297,3 +297,10 @@
   .boat-home #reporting .story:has(.story-photo) { padding:0 16px 24px; }
   .boat-home #reporting .story p { max-width:none; font-size:13px; white-space:nowrap; }
 }
+
+/* On translated pages, lift the byline where it overlays the photograph. */
+@media (min-width: 701px) {
+  .boat-home:has(.language-control button[aria-current="true"]:not([lang="ja"])) .boat-identity {
+    transform: translateY(clamp(-32px, -2vw, -16px));
+  }
+}
