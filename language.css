@@ -19,10 +19,9 @@
   cursor: pointer;
 }
 .language-control:focus-within { outline: 2px solid currentColor; outline-offset: 1px; }
-.language-original { color: #c4c4c4; font: 12px/1.4 sans-serif; white-space: nowrap; }
 body header.site-header { column-gap: 12px; }
 body header.site-header nav { margin-inline-start: auto; }
-.site-header > :is(.language-control,.language-original) { flex: none; }
+.site-header > .language-control { flex: none; }
 @media (max-width: 700px) {
   body header.site-header {
     display: grid;
@@ -37,5 +36,5 @@ body header.site-header nav { margin-inline-start: auto; }
 @media (max-width: 374px) {
   body header.site-header .boat-logo-link { grid-column: 1; }
   body header.site-header nav { grid-column: 1 / -1; grid-row: 2; }
-  .site-header > :is(.language-control,.language-original) { grid-column: 2; grid-row: 1; }
+  .site-header > .language-control { grid-column: 2; grid-row: 1; }
 }
