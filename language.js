@@ -16,7 +16,7 @@
 
   function originalPage() {
     const original = new URL(location.pathname + location.search + location.hash,
-      translated ? 'https://yusukemurayama.github.io' : location.origin);
+      translated ? 'https://murayamayusuke.com' : location.origin);
     for (const key of [...original.searchParams.keys()]) {
       if (key === 'mt' || key === 'lang' || key.startsWith('_x_tr_')) original.searchParams.delete(key);
     }
@@ -38,23 +38,38 @@
   }
 
   function selector() {
-    const control = document.createElement('label');
+    const control = document.createElement('details');
     control.className = 'language-control notranslate';
     control.translate = false;
-    const face = document.createElement('span');
-    face.setAttribute('aria-hidden', 'true');
+    const face = document.createElement('summary');
     face.textContent = '🌐︎ ' + current.split('-')[0].toUpperCase() + ' ▾';
-    const select = document.createElement('select');
-    select.setAttribute('aria-label', '表示言語を選択 / Select language');
+    face.setAttribute('aria-label', 'Select language (' + current + ')');
+    const list = document.createElement('div');
+    list.className = 'language-options';
     for (const [code, name] of Object.entries(languages)) {
-      const option = new Option(name, code);
-      option.lang = code;
-      select.add(option);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.lang = code;
+      button.textContent = name;
+      if (code === current) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => {
+        control.open = false;
+        changeLanguage(code);
+      });
+      list.append(button);
     }
-    select.value = current;
-    select.addEventListener('change', () => changeLanguage(select.value));
-    window.addEventListener('pageshow', () => { select.value = current; });
-    control.append(face, select);
+    control.append(face, list);
+    document.addEventListener('click', event => {
+      if (!control.contains(event.target)) control.open = false;
+    });
+    control.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && control.open) {
+        event.preventDefault();
+        event.stopPropagation();
+        control.open = false;
+        face.focus();
+      }
+    });
     return control;
   }
   const navigation = document.querySelector('.site-header nav');

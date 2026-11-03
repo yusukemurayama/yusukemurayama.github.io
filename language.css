@@ -9,16 +9,29 @@
   white-space: nowrap;
   direction: ltr;
 }
-.language-control select {
+.language-control summary { list-style: none; cursor: pointer; padding: 8px 2px; }
+.language-control summary::-webkit-details-marker { display: none; }
+.language-options {
   position: absolute;
-  inset: 0;
+  z-index: 10;
+  top: 100%;
+  right: 0;
+  padding: 4px;
+  background: #202020;
+  border: 1px solid #777;
+}
+.language-options button {
+  display: block;
   width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: white;
+  text-align: start;
   cursor: pointer;
 }
-.language-control:focus-within { outline: 2px solid currentColor; outline-offset: 1px; }
+.language-options button:is(:hover, :focus-visible, [aria-current]) { background: #444; }
+#detail .language-options { left: 0; right: auto; }
 body header.site-header { column-gap: 12px; }
 body header.site-header nav { margin-inline-start: auto; }
 .site-header > .language-control { flex: none; }
