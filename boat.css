@@ -304,3 +304,6 @@
     transform: translateY(clamp(-32px, -2vw, -16px));
   }
 }
+@media (min-width: 701px) {
+  .boat-title .boat-name, .boat-title h1 { max-width: 49vw; }
+}
