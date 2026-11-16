@@ -8,8 +8,12 @@
     "alt": "",
     "videoUrl": ""
   },
-  "categories": [],
-  "topics": [],
+  "categories": [
+    "メディア出演"
+  ],
+  "topics": [
+    "戦争・人道危機"
+  ],
   "youtubeUrl": "",
   "xPostUrl": ""
 }
