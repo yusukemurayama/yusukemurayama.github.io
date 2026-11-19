@@ -1,5 +1,14 @@
 for (const list of document.querySelectorAll('.work-log ol[data-home-section]')) {
-  for (const post of window.HOME_SELECTION[list.dataset.homeSection]) {
+  const selected = window.HOME_SELECTION[list.dataset.homeSection];
+  // Sort a copy so equal dates retain the CMS order and other consumers are unaffected.
+  const posts = [...selected].sort((a, b) => {
+    const first = Date.parse(a.date);
+    const second = Date.parse(b.date);
+    if (!Number.isFinite(first)) return Number.isFinite(second) ? 1 : 0;
+    if (!Number.isFinite(second)) return -1;
+    return second - first;
+  });
+  for (const post of posts) {
     const item = document.createElement('li');
     const link = document.createElement('a');
     // Google Translate sets document.baseURI to the Japanese site.
